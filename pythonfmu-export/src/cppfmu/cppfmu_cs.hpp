@@ -111,8 +111,7 @@ public:
     virtual void GetRealArray(
         const FMIValueReference vr[],
         std::size_t nvr,
-        FMIReal value[],
-        std::size_t size) const;
+        FMIRealArray value[]) const;
 
     // Called from fmi2DoStep()/fmiDoStep(). Must be implemented in model code.
     virtual bool DoStep(

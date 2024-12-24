@@ -1,3 +1,0 @@
-F:/Anaconda/envs/PyTorch/Lib/site-packages/pythonfmu/pythonfmu-export/build/CMakeFiles/ALL_BUILD.dir
-F:/Anaconda/envs/PyTorch/Lib/site-packages/pythonfmu/pythonfmu-export/build/CMakeFiles/ZERO_CHECK.dir
-F:/Anaconda/envs/PyTorch/Lib/site-packages/pythonfmu/pythonfmu-export/build/src/CMakeFiles/pythonfmu-export.dir

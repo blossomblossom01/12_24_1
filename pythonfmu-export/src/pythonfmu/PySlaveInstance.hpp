@@ -37,7 +37,7 @@ public:
     void GetInteger(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIInteger* value) const override;
     void GetBoolean(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIBoolean* value) const override;
     void GetString(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIString* value) const override;
-    void GetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal* value, std::size_t size) const override;
+    void GetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray* value) const override;
 
     void GetFMUstate(fmi2FMUstate& state) override;
     void SetFMUstate(const fmi2FMUstate& state) override;

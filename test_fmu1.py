@@ -45,8 +45,8 @@ for variable in model_description.modelVariables:
     print((variable.name, variable, variable.valueReference))
     vr = [variable.valueReference]
     print("vr是：",vr)
-    if variable.type == 'Real':
-        value = fmu.getReal(vr=vr)
+    if variable.type == 'RealArray':
+        value = fmu.getRealArray(vr=vr)
         print(value)
 
 # # 设置仿真时间

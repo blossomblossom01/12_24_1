@@ -160,8 +160,7 @@ void SlaveInstance::GetString(
 void SlaveInstance::GetRealArray(
     const FMIValueReference vr[],
     std::size_t nvr,
-    FMIReal value[],
-    std::size_t size) const
+    FMIRealArray /*value*/[]) const
 {
     if (nvr == 0) {
         throw std::logic_error("No variables specified for GetRealArray");

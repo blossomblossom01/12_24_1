@@ -8,7 +8,7 @@ class blossom_1(Fmi2Slave):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.w =[[1,2,3],[2,3,4]]
+        self.w =[1,2,3]
         self.intOut = 1
         self.realOut = 3.0
         self.booleanVariable = True

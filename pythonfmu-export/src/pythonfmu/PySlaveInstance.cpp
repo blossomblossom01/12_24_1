@@ -381,34 +381,34 @@ void PySlaveInstance::SetString(const cppfmu::FMIValueReference* vr, std::size_t
     });
 }
 
-void PySlaveInstance::SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal const* values, std::size_t size)
+void PySlaveInstance::SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray const* values)
 {
-//    py_safe_run([this, &vr, nvr, &values, size](PyGILState_STATE gilState) {
-//        PyObject* vrs = PyList_New(nvr);  // Value references
-//        PyObject* refs = PyList_New(size);  // Array values
-//
-//        // 构建 ValueReference 列表
-//        for (std::size_t i = 0; i < nvr; i++) {
-//            PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
-//        }
-//
-//        // 构建数组值列表
-//        for (std::size_t j = 0; j < size; j++) {
-//            PyList_SetItem(refs, j, Py_BuildValue("d", values[j]));
-//        }
-//
-//        // 调用 Python 的 set_real_array 方法
-//        auto f = PyObject_CallMethod(pInstance_, "set_real_array", "(OO)", vrs, refs);
-//
-//        Py_DECREF(vrs);
-//        Py_DECREF(refs);
-//
-//        if (f == nullptr) {
-//            handle_py_exception("[setRealArray] PyObject_CallMethod", gilState);
-//        }
-//        Py_DECREF(f);
-//        clearLogBuffer();
-//    });
+    py_safe_run([this, &vr, nvr, &values](PyGILState_STATE gilState) {
+        PyObject* vrs = PyList_New(nvr);  // Value references
+        PyObject* refs = PyList_New(size);  // Array values
+
+        // 构建 ValueReference 列表
+        for (std::size_t i = 0; i < nvr; i++) {
+            PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
+        }
+
+        // 构建数组值列表
+        for (std::size_t j = 0; j < size; j++) {
+            PyList_SetItem(refs, j, Py_BuildValue("d", values[j]));
+        }
+
+        // 调用 Python 的 set_real_array 方法
+        auto f = PyObject_CallMethod(pInstance_, "set_real_array", "(OO)", vrs, refs);
+
+        Py_DECREF(vrs);
+        Py_DECREF(refs);
+
+        if (f == nullptr) {
+            handle_py_exception("[setRealArray] PyObject_CallMethod", gilState);
+        }
+        Py_DECREF(f);
+        clearLogBuffer();
+    });
 }
 
 
@@ -504,33 +504,46 @@ void PySlaveInstance::GetString(const cppfmu::FMIValueReference* vr, std::size_t
     });
 }
 
-void PySlaveInstance::GetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal* values, std::size_t size) const
+void PySlaveInstance::GetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray* values) const
 {
-//    py_safe_run([this, &vr, nvr, &values, size](PyGILState_STATE gilState) {
-//        PyObject* vrs = PyList_New(nvr);  // Value references
-//
-//        // 构建 ValueReference 列表
-//        for (std::size_t i = 0; i < nvr; i++) {
-//            PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
-//        }
-//
-//        // 调用 Python 的 get_real_array 方法
-//        auto refs = PyObject_CallMethod(pInstance_, "get_real_array", "O", vrs);
-//        Py_DECREF(vrs);
-//
-//        if (refs == nullptr) {
-//            handle_py_exception("[getRealArray] PyObject_CallMethod", gilState);
-//        }
-//
-//        // 从返回的 Python 列表中提取数组值
-//        for (std::size_t j = 0; j < size; j++) {
-//            PyObject* value = PyList_GetItem(refs, j);
-//            values[j] = PyFloat_AsDouble(value);
-//        }
-//        Py_DECREF(refs);
-//        clearLogBuffer();
-//    });
-       std::cout << "Received parameters: " << std::endl;
+    py_safe_run([this, &vr, nvr, &values](PyGILState_STATE gilState) {
+        PyObject* vrs = PyList_New(nvr);  // Value references
+
+        // 构建 ValueReference 列表
+        for (int i = 0; i < nvr; i++) {
+            PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
+        }
+
+        // 调用 Python 的 get_real_array 方法
+        auto refs = PyObject_CallMethod(pInstance_, "get_real_array", "O", vrs);
+        Py_DECREF(vrs);
+
+        if (refs == nullptr) {
+            handle_py_exception("[getRealArray] PyObject_CallMethod", gilState);
+        }
+
+        for (int i = 0; i < nvr; i++) {
+            PyObject* pyArray = PyList_GetItem(refs, i);  // 获取多维数组
+            if (!PyList_Check(pyArray)) {
+                Py_DECREF(refs);
+                handle_py_exception("[getRealArray] Expected a Python list for each array.", gilState);
+            }
+
+            // 分配内存给 values[i]
+            std::size_t arraySize = PyList_Size(pyArray);
+            values[i] = new double[arraySize];  // 动态分配内存
+
+            // 将 Python 数组的值拷贝到 C++ 数组
+            for (int j = 0; j < arraySize; j++) {
+                PyObject* item = PyList_GetItem(pyArray, j);
+                values[i][j] = PyFloat_AsDouble(item);  // 转换为 double
+            }
+        }
+
+        Py_DECREF(refs);  // 释放返回列表的引用计数
+        clearLogBuffer();
+    });
+//       std::cout << "Received parameters: " << std::endl;
 }
 
 void PySlaveInstance::GetFMUstate(fmi2FMUstate& state)
