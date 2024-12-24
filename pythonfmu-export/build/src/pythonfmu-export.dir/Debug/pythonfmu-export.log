@@ -1,0 +1,17 @@
+﻿  Building Custom Rule F:/Anaconda/envs/PyTorch/Lib/site-packages/pythonfmu/pythonfmu-export/src/CMakeLists.txt
+  cppfmu_cs.cpp
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\cppfmu\cppfmu_cs.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\cppfmu\../fmi/fmi2Functions.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2TypesPlatform.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2FunctionTypes.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  fmi_functions.cpp
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\cppfmu\../fmi/fmi2Functions.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2TypesPlatform.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2FunctionTypes.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  PySlaveInstance.cpp
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\pythonfmu\PySlaveInstance.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\cppfmu\../fmi/fmi2Functions.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2TypesPlatform.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+F:\Anaconda\envs\PyTorch\Lib\site-packages\pythonfmu\pythonfmu-export\src\fmi\fmi2FunctionTypes.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+C:\Users\zla\AppData\Local\Programs\Python\Python39\include\object.h(61,1): fatal  error C1189: #error:  Py_LIMITED_API is incompatible with Py_DEBUG, Py_TRACE_REFS, and Py_REF_DEBUG
+  正在生成代码...
