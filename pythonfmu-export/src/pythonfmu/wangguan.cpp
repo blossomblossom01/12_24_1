@@ -20,7 +20,7 @@ int main(){
     std::size_t size = 3; // 数组大小
 
     // 调用 GetRealArray 方法
-    slaveInstance.GetRealArray(vr, nvr, values, size);
+    slaveInstance.GetRealArray(vr, nvr, values);
 
     // 打印结果
     for (std::size_t i = 0; i < size; ++i) {

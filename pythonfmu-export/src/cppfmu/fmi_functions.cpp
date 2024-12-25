@@ -394,12 +394,12 @@ fmi2Status fmi2SetRealArrayEx(
     fmi2Component c,
     const fmi2ValueReference vr[],
     size_t nvr,
-    const fmi2Real value[],
-    size_t size)
+    const fmi2RealArray value[],
+    const fmi2Integer arraySizes[])
 {
     const auto component = reinterpret_cast<Component*>(c);
     try {
-        component->slave->SetRealArray(vr, nvr, value, size);
+        component->slave->SetRealArray(vr, nvr, value,arraySizes);
         return fmi2OK;
     } catch (const cppfmu::FatalError& e) {
         component->logger.Log(fmi2Fatal, "", e.what());

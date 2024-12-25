@@ -153,8 +153,8 @@ class Fmi2Slave(ABC):
             refs = self.get_boolean(vrs)
         elif isinstance(var, String):
             refs = self.get_string(vrs)
-        elif isinstance(var, Array):
-            refs = self.get_array(vrs)
+        elif isinstance(var, RealArray):
+            refs = self.get_real_array(vrs)
         else:
             raise Exception(f"Unsupported type!")
 
@@ -257,6 +257,7 @@ class Fmi2Slave(ABC):
         refs = []
         for vr in vrs:
             var = self.vars[vr]
+            print("new var is: ",var)
             array_value=var.getter()
             if isinstance(var, RealArray):
                 def get_dimensions(arr):
@@ -265,7 +266,7 @@ class Fmi2Slave(ABC):
                     else:
                         return ()
                 dimensions = get_dimensions(array_value)
-                refs.append(array_value)
+                refs.append(var.getter())
             else:
                 raise TypeError(
                     f"Variable with valueReference={vr} is not of type RealArray!"
@@ -322,7 +323,7 @@ class Fmi2Slave(ABC):
         for vr, value in zip(vrs, values):
             var = self.vars[vr]
             if isinstance(var, RealArray):
-                # print("var是：",var,"values是",values)
+                print("var是：",var,"values是",values)
                 if not isinstance(value, list) or not all(isinstance(v, (int, float)) for v in value):
                     raise ValueError(
                         f"Values for variable with valueReference={vr} must be a list of floats or integers.")

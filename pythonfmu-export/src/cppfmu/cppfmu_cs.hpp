@@ -86,8 +86,8 @@ public:
     virtual void SetRealArray(
         const FMIValueReference vr[],
         std::size_t nvr,
-        const FMIReal value[],
-        std::size_t size);
+        const FMIRealArray value[],
+        const fmi2Integer arraySizes[]);
 
     /* Called from fmi2GetXxx()/fmiGetXxx().
      * Throws std::logic_error by default.

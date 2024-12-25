@@ -1,17 +1,16 @@
-#include "IPyState.hpp"
 #include "PySlaveInstance.hpp"
 
+#include "../cppfmu/cppfmu_cs.hpp"
+#include "IPyState.hpp"
 #include "PyState.hpp"
 
-#include "../cppfmu/cppfmu_cs.hpp"
-
+#include <filesystem>
 #include <fstream>
 #include <functional>
-#include <filesystem>
-#include <string>
 #include <mutex>
 #include <regex>
 #include <sstream>
+#include <string>
 #include <utility>
 
 namespace pythonfmu
@@ -25,7 +24,8 @@ inline std::string getline(const std::string& fileName)
     return line;
 }
 
-PyObject* findClass(const std::string& resources, const std::string& moduleName) {
+PyObject* findClass(const std::string& resources, const std::string& moduleName)
+{
     // Initialize the Python interpreter
     std::string filename = resources + "/" + moduleName + ".py";
     std::string deepestFile = "";
@@ -34,7 +34,7 @@ PyObject* findClass(const std::string& resources, const std::string& moduleName)
     // Read and execute the Python file
     std::ifstream file;
     file.open(filename);
-            
+
     if (!file.is_open()) {
         return nullptr;
     }
@@ -48,7 +48,7 @@ PyObject* findClass(const std::string& resources, const std::string& moduleName)
 
     // Compile python code so classes are added to the namespace
     PyObject* pyModule = PyImport_ImportModule(moduleName.c_str());
-        
+
     if (pyModule == nullptr) {
         return nullptr;
     }
@@ -71,7 +71,7 @@ PyObject* findClass(const std::string& resources, const std::string& moduleName)
     }
 
     fileContents.clear();
-    PyObject* key, * value;
+    PyObject *key, *value;
     Py_ssize_t pos = 0;
 
     while (PyDict_Next(pLocals, &pos, &key, &value)) {
@@ -83,15 +83,15 @@ PyObject* findClass(const std::string& resources, const std::string& moduleName)
         PyObject* pMroAttribute = PyObject_GetAttrString(value, "__mro__");
 
         if (pMroAttribute != NULL && PySequence_Check(pMroAttribute)) {
-            std::regex pattern ("<class '[^']+\\.([^']+)'");
+            std::regex pattern("<class '[^']+\\.([^']+)'");
             PyObject* pMROList = PySequence_List(pMroAttribute);
 
             for (Py_ssize_t i = 0; i < PyList_Size(pMROList); ++i) {
                 PyObject* pItem = PyList_GetItem(pMROList, i);
                 std::smatch match;
                 const char* className = PyBytes_AsString(PyUnicode_AsUTF8String(PyObject_Repr(pItem)));
-                        
-                std::string str (className);
+
+                std::string str(className);
                 bool isMatch = std::regex_search(str, match, pattern);
 
                 // If regex match is successfull, and found Fmi2Slave at the deepest level then update state
@@ -125,7 +125,7 @@ inline void py_safe_run(const std::function<void(PyGILState_STATE gilState)>& f)
 }
 
 PySlaveInstance::PySlaveInstance(std::string instanceName, std::string resources, const cppfmu::Logger& logger, const bool visible, std::shared_ptr<IPyState> pyState)
-    : pyState_{ std::move(pyState) }
+    : pyState_{std::move(pyState)}
     , instanceName_(std::move(instanceName))
     , resources_(std::move(resources))
     , logger_(logger)
@@ -169,7 +169,7 @@ void PySlaveInstance::clearLogBuffer() const
     PyObject* categoryField = Py_BuildValue("s", "category");
     PyObject* statusField = Py_BuildValue("s", "status");
 
-    if ( pMessages_ != NULL && PyList_Check(pMessages_) ) {
+    if (pMessages_ != NULL && PyList_Check(pMessages_)) {
         auto size = PyList_Size(pMessages_);
         for (auto i = 0; i < size; i++) {
             PyObject* msg = PyList_GetItem(pMessages_, i);
@@ -381,25 +381,52 @@ void PySlaveInstance::SetString(const cppfmu::FMIValueReference* vr, std::size_t
     });
 }
 
-void PySlaveInstance::SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray const* values)
+void PySlaveInstance::SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray const* values, const cppfmu::FMIInteger* arraySizes)
 {
-    py_safe_run([this, &vr, nvr, &values](PyGILState_STATE gilState) {
-        PyObject* vrs = PyList_New(nvr);  // Value references
-        PyObject* refs = PyList_New(size);  // Array values
+    py_safe_run([this, &vr, nvr, &values, &arraySizes](PyGILState_STATE gilState) {
+        PyObject* vrs = PyList_New(nvr); // Value references
+        PyObject* refs = PyList_New(nvr); // Array values
+
+        //std::cout << "shuzushi: " << values[0][0] << values[0][1] << values[0][2] << std::endl;
 
         // 构建 ValueReference 列表
         for (std::size_t i = 0; i < nvr; i++) {
             PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
-        }
 
-        // 构建数组值列表
-        for (std::size_t j = 0; j < size; j++) {
-            PyList_SetItem(refs, j, Py_BuildValue("d", values[j]));
-        }
+            cppfmu::FMIInteger size = arraySizes[i];
+            //std::cout << "haojiahuo size is: " << size << std::endl;
+            // 设置数组值（转换为 Python 的嵌套列表）
+            //            std::size_t arraySize = static_cast<std::size_t>(size);  // 取当前的数组大小
+            //            std::cout<<"arraySize is: "<<arraySize<<std::endl;
 
+            PyObject* pyArray = PyList_New(size); // 创建 Python 列表以容纳当前数组的值
+
+            //for (size_t gk = 0; gk < size; gk++) {
+            //    std::cout << "values[i][" << gk << "]" << values[i][gk] << std::endl;
+            //    // 设置每个元素为 Python 浮动数值
+            //    PyList_SetItem(pyArray, gk, Py_BuildValue("d", values[i][gk]));
+            //    std::cout << "pyArray[]:" << pyArray[gk]<<std::endl;
+            //}
+
+            //PyList_SetItem(pyArray, 0, Py_BuildValue("d", values[i][0]));
+            //PyList_SetItem(pyArray, 1, Py_BuildValue("d", values[i][1]));
+            //PyList_SetItem(pyArray, 2, Py_BuildValue("d", values[i][2]));
+
+            //std::cout << "pp:1" << std::endl;
+            for (size_t p = 0; p < size; p++) {
+                //std::cout << "values[i][p]:" << values[i][p]<<std::endl;
+                double d = values[i][p];
+                //std::cout << "d:" << d << std::endl;
+                PyList_SetItem(pyArray, p, Py_BuildValue("d",d));
+            }
+
+            //std::cout << "pp:2" << std::endl;
+            PyList_SetItem(refs, i, pyArray);
+        }
         // 调用 Python 的 set_real_array 方法
         auto f = PyObject_CallMethod(pInstance_, "set_real_array", "(OO)", vrs, refs);
 
+        // 释放 Python 对象引用
         Py_DECREF(vrs);
         Py_DECREF(refs);
 
@@ -415,7 +442,7 @@ void PySlaveInstance::SetRealArray(const cppfmu::FMIValueReference* vr, std::siz
 void PySlaveInstance::GetReal(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal* values) const
 {
     py_safe_run([this, &vr, nvr, &values](PyGILState_STATE gilState) {
-//        std::cout << "Received parameters: " << std::endl;
+        //        std::cout << "Received parameters: " << std::endl;
         PyObject* vrs = PyList_New(nvr);
         for (int i = 0; i < nvr; i++) {
             PyList_SetItem(vrs, i, Py_BuildValue("i", vr[i]));
@@ -507,7 +534,7 @@ void PySlaveInstance::GetString(const cppfmu::FMIValueReference* vr, std::size_t
 void PySlaveInstance::GetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIRealArray* values) const
 {
     py_safe_run([this, &vr, nvr, &values](PyGILState_STATE gilState) {
-        PyObject* vrs = PyList_New(nvr);  // Value references
+        PyObject* vrs = PyList_New(nvr); // Value references
 
         // 构建 ValueReference 列表
         for (int i = 0; i < nvr; i++) {
@@ -523,7 +550,7 @@ void PySlaveInstance::GetRealArray(const cppfmu::FMIValueReference* vr, std::siz
         }
 
         for (int i = 0; i < nvr; i++) {
-            PyObject* pyArray = PyList_GetItem(refs, i);  // 获取多维数组
+            PyObject* pyArray = PyList_GetItem(refs, i); // 获取多维数组
             if (!PyList_Check(pyArray)) {
                 Py_DECREF(refs);
                 handle_py_exception("[getRealArray] Expected a Python list for each array.", gilState);
@@ -531,19 +558,19 @@ void PySlaveInstance::GetRealArray(const cppfmu::FMIValueReference* vr, std::siz
 
             // 分配内存给 values[i]
             std::size_t arraySize = PyList_Size(pyArray);
-            values[i] = new double[arraySize];  // 动态分配内存
+            values[i] = new double[arraySize]; // 动态分配内存
 
             // 将 Python 数组的值拷贝到 C++ 数组
             for (int j = 0; j < arraySize; j++) {
                 PyObject* item = PyList_GetItem(pyArray, j);
-                values[i][j] = PyFloat_AsDouble(item);  // 转换为 double
+                values[i][j] = PyFloat_AsDouble(item); // 转换为 double
             }
         }
 
-        Py_DECREF(refs);  // 释放返回列表的引用计数
+        Py_DECREF(refs); // 释放返回列表的引用计数
         clearLogBuffer();
     });
-//       std::cout << "Received parameters: " << std::endl;
+    //       std::cout << "Received parameters: " << std::endl;
 }
 
 void PySlaveInstance::GetFMUstate(fmi2FMUstate& state)
@@ -675,10 +702,11 @@ PySlaveInstance::~PySlaveInstance()
 
 } // namespace pythonfmu
 
-namespace {
-    std::mutex pyStateMutex{};
-    std::shared_ptr<pythonfmu::PyState> pyState{};
-}
+namespace
+{
+std::mutex pyStateMutex{};
+std::shared_ptr<pythonfmu::PyState> pyState{};
+} // namespace
 
 cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
     cppfmu::FMIString instanceName,
@@ -708,7 +736,7 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
         auto const ensurePyStateAlive = [&]() {
             auto const lock = std::lock_guard{pyStateMutex};
             if (nullptr == pyState) pyState = std::make_shared<pythonfmu::PyState>();
-            };
+        };
 
         ensurePyStateAlive();
         return cppfmu::AllocateUnique<pythonfmu::PySlaveInstance>(
@@ -718,43 +746,43 @@ cppfmu::UniquePtr<cppfmu::SlaveInstance> CppfmuInstantiateSlave(
 
 extern "C" {
 
-    // The PyState instance owns it's own thread for constructing and destroying the Py* from the same thread.
-    // Creation of an std::thread increments ref counter of a shared library. So, when the client unloads the library
-    // the library won't be freed, as std::thread is alive, and the std::thread itself waits for de-initialization request.
-    // Thus, use DllMain on Windows and __attribute__((destructor)) on Linux for signaling to the PyState about de-initialization.
-    void finalizePythonInterpreter()
-    {
-        pyState = nullptr;
-    }
+// The PyState instance owns it's own thread for constructing and destroying the Py* from the same thread.
+// Creation of an std::thread increments ref counter of a shared library. So, when the client unloads the library
+// the library won't be freed, as std::thread is alive, and the std::thread itself waits for de-initialization request.
+// Thus, use DllMain on Windows and __attribute__((destructor)) on Linux for signaling to the PyState about de-initialization.
+void finalizePythonInterpreter()
+{
+    pyState = nullptr;
+}
 }
 
 namespace
 {
 #ifdef _WIN32
-#include <windows.h>
+#    include <windows.h>
 
-    BOOL APIENTRY DllMain(HMODULE hModule,
-        DWORD ul_reason_for_call,
-        LPVOID lpReserved)
-    {
-        switch (ul_reason_for_call) {
-            case DLL_PROCESS_ATTACH:
-                break;
-            case DLL_THREAD_ATTACH:
-            case DLL_THREAD_DETACH:
-                break;
-            case DLL_PROCESS_DETACH:
-                finalizePythonInterpreter();
-                break;
-        }
-        return TRUE;
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD ul_reason_for_call,
+    LPVOID lpReserved)
+{
+    switch (ul_reason_for_call) {
+        case DLL_PROCESS_ATTACH:
+            break;
+        case DLL_THREAD_ATTACH:
+        case DLL_THREAD_DETACH:
+            break;
+        case DLL_PROCESS_DETACH:
+            finalizePythonInterpreter();
+            break;
+    }
+    return TRUE;
 }
 #elif defined(__linux__)
-    __attribute__((destructor)) void onLibraryUnload()
-    {
-        finalizePythonInterpreter();
+__attribute__((destructor)) void onLibraryUnload()
+{
+    finalizePythonInterpreter();
 }
 #else
-#error port the code
+#    error port the code
 #endif
-}
+} // namespace

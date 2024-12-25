@@ -31,7 +31,7 @@ public:
     void SetInteger(const cppfmu::FMIValueReference* vr, std::size_t nvr, const cppfmu::FMIInteger* value) override;
     void SetBoolean(const cppfmu::FMIValueReference* vr, std::size_t nvr, const cppfmu::FMIBoolean* value) override;
     void SetString(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIString const* value) override;
-    void SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal const* value,std::size_t size) override;
+    void SetRealArray(const cppfmu::FMIValueReference* vr, std::size_t nvr, const cppfmu::FMIRealArray* value, const cppfmu::FMIInteger* arraySizes) override;
 
     void GetReal(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIReal* value) const override;
     void GetInteger(const cppfmu::FMIValueReference* vr, std::size_t nvr, cppfmu::FMIInteger* value) const override;

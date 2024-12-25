@@ -2,6 +2,7 @@ from fmpy import *
 from fmpy.simulation import _get_output_variables
 from fmpy.fmi2 import FMU2Slave, FMU2Model
 from fmpy import extract
+import ctypes
 import numpy as np
 # 加载 FMU 文件
 fmu='blossom_1.fmu'
@@ -40,15 +41,26 @@ fmu.instantiate()
 # array_elements = ["w[0]", "w2[1]", "w2[2]"]
 # model.set(array_elements, [1.0, 2.0, 3.0])  # 设置数组值
 # print(fmu.get("w[0]"))
+# fmu.setRealArray(vr=[1,2],value=[[98,7,10],[2,3]])
+
+
+
 for variable in model_description.modelVariables:
     print(variable)
     print((variable.name, variable, variable.valueReference))
     vr = [variable.valueReference]
     print("vr是：",vr)
-    if variable.type == 'RealArray':
-        value = fmu.getRealArray(vr=vr)
-        print(value)
-
+    flag=False
+    if variable.type == 'RealArray' and flag !=True:
+        flag=True
+        fmu.setRealArray(vr=vr,value=[[98,7,10]])
+        value =fmu.getRealArray(vr=vr)
+        # print(dir(value))
+        print(value[0][1])
+    # if variable.type == 'Real':
+    #     # fmu.setRealArray(vr=vr, value=[[98, 7, 10]])
+    #     value = fmu.getReal(vr=vr)
+    #     print(value)
 # # 设置仿真时间
 # fmu.setup_experiment(start_time=0.0, stop_time=10.0)
 #

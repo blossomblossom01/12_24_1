@@ -242,6 +242,7 @@ class RealArray(ScalarVariable):
         if self.__attrs["start"]:
             # Serialize the array as a space-separated string of numbers
             attrib["start"] = " ".join(f"{v:.16g}" for v in self.__attrs["start"])
+        attrib["dimensions"] = str(len(self.__attrs["start"]))
         parent = super().to_xml()
         SubElement(parent, "RealArray", attrib)
         return parent
